@@ -6,7 +6,7 @@ def register_neighbour_command(update: Update, context: CallbackContext) -> None
     """
     Adds neighbour's alias to user_data of current user.
 
-    Syntax: /register_neighbour @{alias}
+    Syntax: /register_neighbour @{alias} @{alias} @{alias} ...
 
     key: 'neighbour_aliases'
     format: '@{alias} @{alias} @...'
@@ -14,20 +14,29 @@ def register_neighbour_command(update: Update, context: CallbackContext) -> None
 
     key = 'neighbour_aliases'
 
-    try:
-        value = update.message.text.split(' ')[1]
+    aliases = context.args
 
-        if key in context.user_data.keys():
-            context.user_data[key] += value + ' '
-        else:
-            context.user_data.update({key: value+' '})
+    if aliases:
+        for alias in aliases:
+            if '@' != alias[0]:
+                # separate in errors.py later
+                message = 'Use syntax /register_neighbour @alias @alias @alias ...'
+                update.message.reply_text(
+                    text=message
+                )
+                return
 
-        message = f'Neighbour {value} successfully added'
+        # replace with db adding later
+        context.user_data.update({key: ' '.join(aliases)})
+
+        aliases_str = ', '.join(aliases)
+        message = f"{aliases_str} was successfully added to neighbours' list" if len(aliases) == 1 \
+            else f"{aliases_str} were successfully added to neighbours' list"
         update.message.reply_text(
             text=message
         )
-    except IndexError:
-        message = 'Use syntax /register_neighbour @alias'
+    else:
+        message = 'Use syntax /register_neighbour @alias @alias @alias ...'
         update.message.reply_text(
             text=message
         )
